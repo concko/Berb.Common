@@ -306,6 +306,16 @@ namespace LeagueSharp.Common
         }
 
         /// <summary>
+        /// Adds the Players hitbox to the range value
+        /// </summary>
+        public bool AddSelfHitboxToRange { get; set; }
+
+        /// <summary>
+        /// Adds the Enemies hitbox to the range value
+        /// </summary>
+        public bool AddEnemyHitboxToRange { get; set; }
+
+        /// <summary>
         /// Gets or sets the range.
         /// </summary>
         /// <value>The range.</value>
@@ -313,9 +323,16 @@ namespace LeagueSharp.Common
         {
             get
             {
+                var baseRange = _range;
+
+                if (AddSelfHitboxToRange)
+                {
+                    baseRange += ObjectManager.Player.BoundingRadius;
+                }
+
                 if (!IsChargedSpell)
                 {
-                    return _range;
+                    return baseRange;
                 }
 
                 if (IsCharging)
@@ -330,6 +347,34 @@ namespace LeagueSharp.Common
                 return ChargedMaxRange;
             }
             set { _range = value; }
+        }
+
+        /// <summary>
+        /// Gets the range the spell has when casted to target
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public float GetRange(Obj_AI_Base target)
+        {
+            var result = Range;
+
+            if (AddEnemyHitboxToRange && target != null)
+            {
+                result += target.BoundingRadius;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the range sqared the spell has when casted to target
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public float GetRangeSqr(Obj_AI_Base target)
+        {
+            var result = GetRange(target);
+            return result * result;
         }
 
         /// <summary>
@@ -636,7 +681,7 @@ namespace LeagueSharp.Common
             if (!IsSkillshot)
             {
                 //Target out of range
-                if (RangeCheckFrom.LSDistance(unit.ServerPosition, true) > RangeSqr)
+                if (RangeCheckFrom.LSDistance(unit.ServerPosition, true) > GetRangeSqr(unit))
                 {
                     return CastStates.OutOfRange;
                 }
@@ -678,7 +723,7 @@ namespace LeagueSharp.Common
             }
 
             //Target out of range.
-            if (RangeCheckFrom.LSDistance(prediction.CastPosition, true) > RangeSqr)
+            if (RangeCheckFrom.LSDistance(prediction.CastPosition, true) > GetRangeSqr(unit))
             {
                 return CastStates.OutOfRange;
             }

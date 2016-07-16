@@ -76,7 +76,10 @@ namespace LeagueSharp.Common
                 AfterAttack(args);
 
             if (args.ResetAATimer)
+            {
                 instance.ResetAutoAttackTimer();
+                instance.reset = true;
+            }
 
             return args;
         }

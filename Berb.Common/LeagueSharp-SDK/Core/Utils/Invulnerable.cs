@@ -21,12 +21,11 @@ namespace LeagueSharp.SDK.Core.Utils
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using EloBuddy; using Enumerations;
-    using LeagueSharp.SDK;
 
-    /// <summary>
-    ///     Invulnerable utility class
-    /// </summary>
+    using EloBuddy;
+    using Core.Utils;    /// <summary>
+                         ///     Invulnerable utility class
+                         /// </summary>
     public class Invulnerable
     {
         #region Static Fields
@@ -70,16 +69,22 @@ namespace LeagueSharp.SDK.Core.Utils
                                 CheckFunction = (target, type) => target.HealthPercent <= 5
                             },
                         new InvulnerableEntry("JudicatorIntervention") { IsShield = true },
-                        new InvulnerableEntry("fizztrickslamsounddummy") { ChampionName = "Fizz" },
-                        new InvulnerableEntry("VladimirSanguinePool") { ChampionName = "Vladimir" },
-                        new InvulnerableEntry("FioraW") { ChampionName = "Fiora" },
+                        new InvulnerableEntry("FioraW") { ChampionName = "Fiora", IsShield = true },
                         new InvulnerableEntry("JaxCounterStrike")
-                            { ChampionName = "Jax", DamageType = DamageType.Physical },
+                            { ChampionName = "Jax", IsShield = true, DamageType = DamageType.Physical },
                         new InvulnerableEntry("BlackShield") { IsShield = true, DamageType = DamageType.Magical },
                         new InvulnerableEntry("BansheesVeil") { IsShield = true, DamageType = DamageType.Magical },
                         new InvulnerableEntry("SivirE") { ChampionName = "Sivir", IsShield = true },
                         new InvulnerableEntry("NocturneShroudofDarkness") { ChampionName = "Nocturne", IsShield = true },
                         new InvulnerableEntry("malzaharpassiveshield") { ChampionName = "Malzahar", IsShield = true },
+                        new InvulnerableEntry("OlafRagnarock")
+                            {
+                                ChampionName = "Olaf", IsShield = true,
+                                CheckFunction =
+                                    (target, type) =>
+                                    GameObjects.Player.CountEnemyHeroesInRange(
+                                        GameObjects.Player.GetRealAutoAttackRange()) > 1
+                            },
                         new InvulnerableEntry("KindredrNoDeathBuff")
                             {
                                 ChampionName = "Kindred", MinHealthPercent = 10,
@@ -127,7 +132,7 @@ namespace LeagueSharp.SDK.Core.Utils
                     {
                         if (hero.HasBuff(entry.BuffName))
                         {
-                            if (ignoreShields || !entry.IsShield)
+                            if (!ignoreShields || !entry.IsShield)
                             {
                                 if (entry.CheckFunction == null || ExecuteCheckFunction(entry, hero, damageType))
                                 {
@@ -202,7 +207,7 @@ namespace LeagueSharp.SDK.Core.Utils
             }
             catch (Exception ex)
             {
-                Logging.Write()(LogLevel.Error, ex);
+                //LogManager.GetCurrentClassLogger().Error(ex);
             }
             return false;
         }

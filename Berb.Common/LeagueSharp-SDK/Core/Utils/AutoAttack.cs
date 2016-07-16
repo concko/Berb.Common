@@ -149,8 +149,7 @@ namespace LeagueSharp.SDK.Core.Utils
                 return 0;
             }
 
-            var result = sender.AttackRange + sender.BoundingRadius
-                         + (target != null && target.IsValid ? target.BoundingRadius : 0);
+            var result = sender.AttackRange + sender.BoundingRadius + (target != null && target.IsValid ? target.BoundingRadius : 0);
             var heroSource = sender as AIHeroClient;
 
             if (heroSource != null && heroSource.ChampionName == "Caitlyn")
